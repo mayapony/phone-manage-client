@@ -2,59 +2,59 @@
   <n-button size="large" type="primary" @click="showModal = true">入库</n-button>
   <n-modal
     v-model:show="showModal"
+    content="你确认?"
+    negative-text="取消"
+    positive-text="确认"
     preset="dialog"
     title="入库手机信息"
-    content="你确认?"
+    transform-origin="center"
     @negative-click="showModal = false"
     @positive-click="handleSubmitForm"
-    positive-text="确认"
-    negative-text="取消"
-    transform-origin="center"
   >
     <n-form ref="formRef" label-placement="top">
       <n-grid :cols="24" :x-gap="12">
         <n-form-item-gi :span="15" label="品牌">
           <n-select
             v-model:value="form.brandName"
-            filterable
-            tag
             :options="options.brandName"
+            filterable
             placeholder="请选择品牌"
+            tag
           ></n-select>
         </n-form-item-gi>
         <n-form-item-gi :span="15" label="型号">
           <n-select
             v-model:value="form.model"
-            filterable
-            tag
             :options="options.model"
+            filterable
             placeholder="请选择品牌"
+            tag
           ></n-select>
         </n-form-item-gi>
         <n-form-item-gi :span="15" label="颜色">
           <n-select
             v-model:value="form.color"
-            filterable
-            tag
             :options="options.color"
+            filterable
             placeholder="请选择品牌"
+            tag
           ></n-select>
         </n-form-item-gi>
         <n-form-item-gi :span="10" label="运行内存">
-          <n-select v-model:value="form.ram" filterable :options="options.ram" />
+          <n-select v-model:value="form.ram" :options="options.ram" filterable />
         </n-form-item-gi>
         <n-form-item-gi :span="10" label="存储容量">
-          <n-select v-model:value="form.rom" filterable :options="options.rom" />
+          <n-select v-model:value="form.rom" :options="options.rom" filterable />
         </n-form-item-gi>
         <n-form-item-gi :span="24" label="串码（可同时录入多个）">
           <n-select
             v-model:value="form.sn"
+            :show="false"
+            :show-arrow="false"
             filterable
             multiple
-            tag
             placeholder="请扫码或输入后回车"
-            :show-arrow="false"
-            :show="false"
+            tag
           />
         </n-form-item-gi>
         <n-form-item-gi :span="8" label="单价">
@@ -67,15 +67,18 @@
   </n-modal>
 </template>
 
-<script setup lang="ts">
-import { reactive, ref } from 'vue';
+<script lang="ts" setup>
+import { onMounted, reactive, ref, UnwrapNestedRefs } from 'vue';
+import { StockInFormInterface } from '../../interface/stock-in-form.interface';
+import { ItemService } from '../../api/ItemService';
+import { IResponse } from '../../interface/IResponse';
+import { useMessage } from 'naive-ui';
+import { PhoneService } from '../../api/PhoneService';
+import { Option } from '../../interface/option';
 
 let showModal = ref(false);
-const options = reactive({
-  brandName: [
-    { label: 'vivo', value: 'vivo' },
-    { label: 'oppo', value: 'oppo' },
-  ],
+const options = reactive<{ brandName: Option[]; model: Option[]; color: Option[]; ram: Option[]; rom: Option[] }>({
+  brandName: [],
   model: [],
   color: [],
   ram: [
@@ -90,7 +93,10 @@ const options = reactive({
     { label: 256, value: 256 },
   ],
 });
-const form = reactive({
+const message = useMessage();
+const emit = defineEmits<{ (e: 'refreshData'): void }>();
+
+const form: UnwrapNestedRefs<StockInFormInterface> = reactive({
   brandName: '',
   model: '',
   ram: 6,
@@ -101,7 +107,42 @@ const form = reactive({
 });
 
 const handleSubmitForm = () => {
-  console.log(form);
+  ItemService.stockIn(form)
+    .then((res: IResponse) => {
+      if (res.status) {
+        message.success('入库成功!');
+        emit('refreshData');
+      } else {
+        message.error(`${res.message}`);
+      }
+    })
+    .catch((err) => {
+      message.error('请求失败！');
+    });
+};
+
+onMounted(() => {
+  loadBrandNameData();
+});
+
+const loadBrandNameData = () => {
+  PhoneService.findBrandName().then((res) => {
+    if (res.status) {
+      let brandNames: { label: string; value: string }[] = [];
+      for (let d of res.data) {
+        brandNames.push({
+          label: d.phone_brandName,
+          value: d.phone_brandName,
+        });
+      }
+      options.brandName = brandNames;
+    }
+  });
+};
+</script>
+<script lang="ts">
+export default {
+  name: 'import-modal',
 };
 </script>
 

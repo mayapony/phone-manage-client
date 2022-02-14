@@ -10,6 +10,16 @@ const routers = [
     name: 'home',
     component: () => import('../views/Home.vue'),
   },
+  {
+    path: '/stock',
+    name: 'stock',
+    component: () => import('../views/Stock.vue'),
+  },
+  {
+    path: '/record',
+    name: 'record',
+    component: () => import('../views/Record.vue'),
+  },
 ];
 
 const router = createRouter({

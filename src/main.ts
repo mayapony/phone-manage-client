@@ -11,6 +11,7 @@ import {
   NMessageProvider,
   NLayoutHeader,
   NLayoutContent,
+  NLayoutFooter,
   NSpace,
   NInput,
   NIcon,
@@ -21,6 +22,13 @@ import {
   NSelect,
   NInputNumber,
   NConfigProvider,
+  NStatistic,
+  NNumberAnimation,
+  NDialogProvider,
+  NDropdown,
+  NDrawer,
+  NDrawerContent,
+  NTag,
 } from 'naive-ui';
 
 const naive = create({
@@ -33,6 +41,7 @@ const naive = create({
     NLayoutSider,
     NLayoutHeader,
     NLayoutContent,
+    NLayoutFooter,
     NSpace,
     NInput,
     NIcon,
@@ -43,6 +52,13 @@ const naive = create({
     NSelect,
     NInputNumber,
     NConfigProvider,
+    NStatistic,
+    NNumberAnimation,
+    NDialogProvider,
+    NDrawer,
+    NDrawerContent,
+    NDropdown,
+    NTag,
   ],
 });
 

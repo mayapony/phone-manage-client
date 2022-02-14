@@ -4,42 +4,47 @@
 // import HelloWorld from './components/HelloWorld.vue'
 import { zhCN } from 'naive-ui';
 import Menu from './components/common/Menu.vue';
+import { onMounted } from 'vue';
+
+onMounted(() => {
+  let vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+  window.addEventListener('resize', () => {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  });
+});
 </script>
 
 <template>
-  <n-config-provider>
-    <n-message-provider :locale="zhCN">
-      <!--    <div id="main">-->
-      <n-layout>
-        <n-layout has-sider>
-          <n-layout-sider
-            bordered
-            show-trigger
-            collapse-mode="width"
-            :collapsed-width="64"
-            :width="200"
-            :native-scrollbar="false"
-            style="height: 100vh"
-          >
-            <Menu id="menu" />
-          </n-layout-sider>
-          <n-layout>
-            <router-view />
+  <div id="app">
+    <n-config-provider :locale="zhCN" style="height: 100%">
+      <n-dialog-provider>
+        <n-message-provider>
+          <!--    <div id="main">-->
+          <n-layout style="height: 100%">
+            <n-layout has-sider style="height: 100%">
+              <Menu id="menu" />
+              <n-layout>
+                <router-view />
+              </n-layout>
+            </n-layout>
           </n-layout>
-        </n-layout>
-      </n-layout>
-      <!--    </div>-->
-    </n-message-provider>
-  </n-config-provider>
-  <!--  <img alt="Vue logo" src="./assets/logo.png" />-->
-  <!--  <HelloWorld msg="Hello Vue 3 + TypeScript + Vite" />-->
+          <!--    </div>-->
+        </n-message-provider>
+      </n-dialog-provider>
+    </n-config-provider>
+  </div>
 </template>
 
 <style scoped></style>
 
 <style>
 html,
-body {
+body,
+#app {
   height: 100%;
+  background-color: rgba(38, 24, 49, 0.6);
 }
 </style>
