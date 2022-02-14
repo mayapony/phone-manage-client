@@ -19,4 +19,9 @@ export default defineConfig({
     port: 3000,
     open: false,
   },
+  root: process.cwd(),
+  build: {
+    outDir: 'dist',
+  },
+  base: './',
 });

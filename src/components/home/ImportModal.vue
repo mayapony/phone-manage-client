@@ -19,6 +19,7 @@
             :options="options.brandName"
             filterable
             placeholder="请选择品牌"
+            @update:value="handleUpdateBrandName"
             tag
           ></n-select>
         </n-form-item-gi>
@@ -27,7 +28,9 @@
             v-model:value="form.model"
             :options="options.model"
             filterable
-            placeholder="请选择品牌"
+            placeholder="请选择型号"
+            :loading="modelLoading"
+            @update:value="handleUpdateModel"
             tag
           ></n-select>
         </n-form-item-gi>
@@ -36,7 +39,8 @@
             v-model:value="form.color"
             :options="options.color"
             filterable
-            placeholder="请选择品牌"
+            placeholder="请选择颜色"
+            :loading="colorLoadingRef"
             tag
           ></n-select>
         </n-form-item-gi>
@@ -77,6 +81,8 @@ import { PhoneService } from '../../api/PhoneService';
 import { Option } from '../../interface/option';
 
 let showModal = ref(false);
+let modelLoading = ref(false);
+let colorLoadingRef = ref(false);
 const options = reactive<{ brandName: Option[]; model: Option[]; color: Option[]; ram: Option[]; rom: Option[] }>({
   brandName: [],
   model: [],
@@ -119,6 +125,40 @@ const handleSubmitForm = () => {
     .catch((err) => {
       message.error('请求失败！');
     });
+};
+
+const handleUpdateBrandName = () => {
+  form.model = '';
+  form.color = '';
+  form.price = 0;
+  modelLoading.value = true;
+  PhoneService.findMedal(form).then((res) => {
+    if (res.status) {
+      let models: Option[] = [];
+      for (const d of res.data) {
+        models.push({ label: d, value: d });
+      }
+      options.model = models;
+      modelLoading.value = false;
+    }
+  });
+};
+
+const handleUpdateModel = () => {
+  form.color = '';
+  form.price = 0;
+  colorLoadingRef.value = true;
+  PhoneService.findColor(form).then((res) => {
+    if (res.status) {
+      let colors: Option[] = [];
+      console.log(res.data);
+      for (const d of res.data) {
+        colors.push({ label: d, value: d });
+      }
+      options.color = colors;
+      colorLoadingRef.value = false;
+    }
+  });
 };
 
 onMounted(() => {
