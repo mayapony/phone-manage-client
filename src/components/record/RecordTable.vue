@@ -6,7 +6,7 @@ export default {
 <script lang="ts" setup>
 import { QrCode as QrCodeIcon } from '@vicons/ionicons5';
 import { DataTableColumn, NButton, NSpace } from 'naive-ui';
-import { h, onMounted, ref, UnwrapRef } from 'vue';
+import { h, onMounted, reactive, ref, UnwrapRef } from 'vue';
 import { RecordService } from '../../api/RecordService';
 import { Record } from '../../entity/record';
 import { formatTime } from '../../utils';
@@ -73,6 +73,20 @@ const columns: DataTableColumn[] = [
 
 let tableData = ref<Record[]>([]);
 
+const paginationReactive = reactive({
+  page: 1,
+  pageSize: 10,
+  showSizePicker: true,
+  pageSizes: [10, 15, 20],
+  onChange: (page: any) => {
+    paginationReactive.page = page;
+  },
+  onUpdatePageSize: (pageSize: any) => {
+    paginationReactive.pageSize = pageSize;
+    paginationReactive.page = 1;
+  },
+});
+
 onMounted(() => {
   loadAllData();
 });
@@ -103,7 +117,7 @@ const loadAllData = () => {
         </div>
       </n-layout-header>
       <n-layout-content>
-        <n-data-table :columns="columns" :data="tableData" />
+        <n-data-table :columns="columns" :data="tableData" :pagination="paginationReactive" />
       </n-layout-content>
     </n-space>
   </n-layout>

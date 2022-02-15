@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { QrCode as QrCodeIcon } from '@vicons/ionicons5';
 import { DataTableColumn, NButton, NSpace } from 'naive-ui';
-import { h, onMounted, ref, UnwrapRef } from 'vue';
+import { h, onMounted, reactive, ref } from 'vue';
 import { PhoneService } from '../../api/PhoneService';
 import { Phone } from '../../entity/phone';
 import ImportModal from '../home/ImportModal.vue';
+import { PageState } from '../../interface/page-state';
 
 const columns: DataTableColumn[] = [
   { title: '品牌', key: 'brandName', align: 'center' },
@@ -46,13 +47,30 @@ const columns: DataTableColumn[] = [
 let tableData = ref<Phone[]>([]);
 let showDrawer = ref<boolean>(false);
 let sns = ref<string[]>([]);
-
-onMounted(() => {
-  loadAllData();
+const paginationReactive = reactive({
+  page: 1,
+  pageSize: 10,
+  showSizePicker: true,
+  pageSizes: [10, 15, 20],
+  onChange: (page: any) => {
+    paginationReactive.page = page;
+  },
+  onUpdatePageSize: (pageSize: any) => {
+    paginationReactive.pageSize = pageSize;
+    paginationReactive.page = 1;
+  },
+});
+const pageStateReactive = reactive<PageState>({
+  skip: paginationReactive.page * paginationReactive.pageSize,
+  take: paginationReactive.pageSize,
 });
 
-const loadAllData = () => {
-  PhoneService.findAll().then((res: any) => {
+onMounted(() => {
+  initData();
+});
+
+const initData = () => {
+  PhoneService.findAll(pageStateReactive).then((res: any) => {
     tableData.value = res;
   });
 };
@@ -81,7 +99,7 @@ export default {
         </div>
       </n-layout-header>
       <n-layout-content>
-        <n-data-table :columns="columns" :data="tableData" />
+        <n-data-table :columns="columns" :data="tableData" :pagination="paginationReactive" />
       </n-layout-content>
     </n-space>
   </n-layout>
