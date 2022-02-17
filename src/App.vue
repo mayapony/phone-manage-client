@@ -4,17 +4,8 @@
 // import HelloWorld from './components/HelloWorld.vue'
 import { zhCN } from 'naive-ui';
 import Menu from './components/common/Menu.vue';
-import { onMounted } from 'vue';
-
-onMounted(() => {
-  let vh = window.innerHeight * 0.01;
-  document.documentElement.style.setProperty('--vh', `${vh}px`);
-
-  window.addEventListener('resize', () => {
-    let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-  });
-});
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 </script>
 
 <template>
@@ -25,10 +16,7 @@ onMounted(() => {
           <!--    <div id="main">-->
           <n-layout style="height: 100%">
             <n-layout has-sider style="height: 100%">
-              <Menu id="menu" />
-              <n-layout>
-                <router-view />
-              </n-layout>
+              <router-view />
             </n-layout>
           </n-layout>
           <!--    </div>-->

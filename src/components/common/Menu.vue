@@ -1,7 +1,13 @@
 <script lang="ts">
 import { defineComponent, h, onMounted, ref } from 'vue';
 import { NIcon, useMessage } from 'naive-ui';
-import { Home as HomeIcon, Storefront as StockIcon, FolderOpen as RecordIcon } from '@vicons/ionicons5';
+import {
+  Home as HomeIcon,
+  Storefront as StockIcon,
+  FolderOpen as RecordIcon,
+  LogOut,
+  PieChart,
+} from '@vicons/ionicons5';
 import { useRouter } from 'vue-router';
 
 let collapsed = ref<boolean>(true);
@@ -26,6 +32,16 @@ const menuOptions = [
     key: '/record',
     icon: renderIcon(RecordIcon),
   },
+  {
+    label: '统计',
+    key: '/statistics',
+    icon: renderIcon(PieChart),
+  },
+  {
+    label: '退出',
+    key: '/logout',
+    icon: renderIcon(LogOut),
+  },
 ];
 
 export default defineComponent({
@@ -34,7 +50,12 @@ export default defineComponent({
     const router = useRouter();
 
     const handleUpdateValue = (key: string) => {
-      router.push({ path: key });
+      if (key === '/logout') {
+        window.localStorage.removeItem('isLogin');
+        router.push({ path: 'login' });
+      } else {
+        router.push({ path: key });
+      }
     };
 
     router.beforeEach((to, from, next) => {

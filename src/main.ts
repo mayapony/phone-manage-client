@@ -29,6 +29,10 @@ import {
   NDrawer,
   NDrawerContent,
   NTag,
+  NDatePicker,
+  NCascader,
+  NTabs,
+  NTabPane,
 } from 'naive-ui';
 
 const naive = create({
@@ -59,6 +63,10 @@ const naive = create({
     NDrawerContent,
     NDropdown,
     NTag,
+    NDatePicker,
+    NCascader,
+    NTabs,
+    NTabPane,
   ],
 });
 

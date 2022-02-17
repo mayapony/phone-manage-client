@@ -1,16 +1,18 @@
 <script lang="ts" setup>
-import { QrCode as QrCodeIcon } from '@vicons/ionicons5';
-import { DataTableColumn, NButton, NSpace } from 'naive-ui';
+import { CascaderOption, DataTableColumn, NButton, NSpace } from 'naive-ui';
 import { h, onMounted, reactive, ref } from 'vue';
 import { PhoneService } from '../../api/PhoneService';
 import { Phone } from '../../entity/phone';
 import ImportModal from '../home/ImportModal.vue';
-import { PageState } from '../../interface/page-state';
+import { StockInFormInterface } from '../../interface/stock-in-form.interface';
+import { FindCondition } from '../../interface/phone/find-condition';
 
 const columns: DataTableColumn[] = [
   { title: '品牌', key: 'brandName', align: 'center' },
   { title: '型号', key: 'model', align: 'center' },
   { title: '颜色', key: 'color', align: 'center' },
+  { title: '运行内存', key: 'ram', align: 'center' },
+  { title: '存储容量', key: 'rom', align: 'center' },
   { title: '价格', key: 'price', align: 'center' },
   {
     title: '数量',
@@ -44,6 +46,8 @@ const columns: DataTableColumn[] = [
   },
 ];
 
+let tableLoadingRef = ref(false);
+let filterConditionRef = ref<string[]>([]);
 let tableData = ref<Phone[]>([]);
 let showDrawer = ref<boolean>(false);
 let sns = ref<string[]>([]);
@@ -60,18 +64,99 @@ const paginationReactive = reactive({
     paginationReactive.page = 1;
   },
 });
-const pageStateReactive = reactive<PageState>({
-  skip: paginationReactive.page * paginationReactive.pageSize,
-  take: paginationReactive.pageSize,
-});
+// const pageStateReactive = reactive<PageState>({
+//   skip: paginationReactive.page * paginationReactive.pageSize,
+//   take: paginationReactive.pageSize,
+// });
+let optionsRef = ref<any[]>([]);
+let stockInForm: StockInFormInterface = {
+  brandName: '',
+  color: '',
+  model: '',
+  ram: 0,
+  rom: 0,
+  sn: [],
+  price: 0,
+};
 
 onMounted(() => {
-  initData();
+  loadAllData({ brandName: '', model: '', color: '' });
+  loadBrandNameData();
 });
 
-const initData = () => {
-  PhoneService.findAll(pageStateReactive).then((res: any) => {
+const loadAllData = (findCondition: FindCondition) => {
+  tableLoadingRef.value = true;
+  PhoneService.findAll(findCondition).then((res: any) => {
+    console.log(res);
+    tableLoadingRef.value = false;
     tableData.value = res;
+  });
+};
+
+const loadBrandNameData = () => {
+  PhoneService.findBrandName().then((res) => {
+    if (res.status) {
+      let brandNames: CascaderOption[] = [];
+      for (let d of res.data) {
+        brandNames.push({
+          label: d.phone_brandName,
+          value: d.phone_brandName,
+          isLeaf: false,
+          depth: 1,
+        });
+      }
+      optionsRef.value = brandNames;
+      console.log(optionsRef.value);
+    }
+  });
+};
+
+const handleUpdateFilter = (value: any, option: any, arrayOption: any[]) => {
+  let mapArray: string[] = ['brandName', 'model', 'color'];
+  let findCondition: any = {};
+  for (const idx in arrayOption) {
+    findCondition[mapArray[idx]] = arrayOption[idx].label;
+  }
+  loadAllData(findCondition);
+};
+
+const handleLoad = (option: CascaderOption) => {
+  return new Promise<void>((resolve) => {
+    if (option.depth === 1) {
+      stockInForm.brandName = option.label as string;
+      PhoneService.findMedal(stockInForm).then((res) => {
+        if (res.data) {
+          let children: CascaderOption[] = [];
+          for (const model of res.data) {
+            children.push({
+              label: model,
+              value: model,
+              depth: 2,
+              isLeaf: false,
+            });
+          }
+          option.children = children;
+          resolve();
+        }
+      });
+    } else if (option.depth === 2) {
+      stockInForm.model = option.label as string;
+      PhoneService.findColor(stockInForm).then((res) => {
+        if (res.data) {
+          let children: CascaderOption[] = [];
+          for (const color of res.data) {
+            children.push({
+              label: color,
+              value: color,
+              depth: 3,
+              isLeaf: true,
+            });
+          }
+          option.children = children;
+          resolve();
+        }
+      });
+    }
   });
 };
 </script>
@@ -87,19 +172,29 @@ export default {
     <n-space vertical>
       <n-layout-header>
         <div id="home-header">
-          <n-space>
-            <n-input placeholder="请输入串码" size="large">
-              <template #prefix>
-                <n-icon :component="QrCodeIcon" />
-              </template>
-            </n-input>
-            <n-button size="large" type="tertiary">搜索</n-button>
-            <import-modal @refreshData="loadAllData" />
-          </n-space>
+          <n-cascader
+            v-model:value="filterConditionRef"
+            placeholder="品牌/型号/颜色"
+            :options="optionsRef"
+            check-strategy="all"
+            @update:value="handleUpdateFilter"
+            :remote="true"
+            style="width: 300px; display: inline-block"
+            size="large"
+            clearable
+            :on-load="handleLoad"
+          />
+          <import-modal @refreshData="loadAllData" style="display: inline-block" />
         </div>
       </n-layout-header>
       <n-layout-content>
-        <n-data-table :columns="columns" :data="tableData" :pagination="paginationReactive" />
+        <n-data-table
+          :columns="columns"
+          :data="tableData"
+          :pagination="paginationReactive"
+          striped
+          :loading="tableLoadingRef"
+        />
       </n-layout-content>
     </n-space>
   </n-layout>
@@ -112,8 +207,9 @@ export default {
 
 <style scoped>
 #home-header {
-  float: right;
-  margin-top: 20px;
-  margin-right: 20px;
+  margin: 20px 20px 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 </style>

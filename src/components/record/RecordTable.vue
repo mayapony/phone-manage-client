@@ -4,14 +4,17 @@ export default {
 };
 </script>
 <script lang="ts" setup>
-import { QrCode as QrCodeIcon } from '@vicons/ionicons5';
 import { DataTableColumn, NButton, NSpace } from 'naive-ui';
 import { h, onMounted, reactive, ref, UnwrapRef } from 'vue';
 import { RecordService } from '../../api/RecordService';
 import { Record } from '../../entity/record';
 import { formatTime } from '../../utils';
 
-const columns: DataTableColumn[] = [
+const props = defineProps<{
+  paid: boolean;
+}>();
+
+const columns: DataTableColumn[] = reactive([
   { title: '手机信息', key: 'phoneInfo', align: 'center' },
   {
     title: '实收',
@@ -55,23 +58,11 @@ const columns: DataTableColumn[] = [
     },
   },
   { title: '串码', key: 'sn', align: 'center' },
-  // {
-  //   title: '操作',
-  //   key: 'action',
-  //   align: 'center',
-  //   render(row) {
-  //     return h(
-  //       NButton,
-  //       {
-  //         onClick: () => {},
-  //       },
-  //       { default: () => '查看串码' },
-  //     );
-  //   },
-  // },
-];
+]);
 
+let tableLoadingRef = ref(true);
 let tableData = ref<Record[]>([]);
+let rangeRef = ref<[number, number]>([Date.now() - 24 * 7 * 60 * 60 * 1000, Date.now()]);
 
 const paginationReactive = reactive({
   page: 1,
@@ -87,14 +78,41 @@ const paginationReactive = reactive({
   },
 });
 
+const handleUpdateRange = () => {
+  loadAllData();
+};
+
 onMounted(() => {
+  console.log(props.paid);
+  if (!props.paid) {
+    columns.push({
+      title: '操作',
+      key: 'action',
+      align: 'center',
+      render(row) {
+        return h(
+          NButton,
+          {
+            type: 'primary',
+            onClick: () => {},
+          },
+          { default: () => '付款' },
+        );
+      },
+    });
+  }
   loadAllData();
 });
 
 const loadAllData = () => {
-  RecordService.findRecords().then((res) => {
+  tableLoadingRef.value = true;
+  RecordService.findRecords({
+    dateRange: rangeRef.value,
+    paid: props.paid,
+  }).then((res) => {
     if (res.status) {
       tableData.value = res.data;
+      tableLoadingRef.value = false;
       console.log(tableData.value);
     }
   });
@@ -107,17 +125,27 @@ const loadAllData = () => {
       <n-layout-header>
         <div id="home-header">
           <n-space>
-            <n-input placeholder="请输入" size="large">
-              <template #prefix>
-                <n-icon :component="QrCodeIcon" />
-              </template>
-            </n-input>
+            <n-date-picker
+              v-model:value="rangeRef"
+              type="datetimerange"
+              style="display: inline-block"
+              size="large"
+              :default-time="['07:00:00', '23:00:00']"
+              @update:value="handleUpdateRange"
+            />
+            <n-input placeholder="请输入用户手机号码/手机信息" size="large" />
             <n-button size="large" type="tertiary">搜索</n-button>
           </n-space>
         </div>
       </n-layout-header>
       <n-layout-content>
-        <n-data-table :columns="columns" :data="tableData" :pagination="paginationReactive" />
+        <n-data-table
+          :columns="columns"
+          :data="tableData"
+          :pagination="paginationReactive"
+          striped
+          :loading="tableLoadingRef"
+        />
       </n-layout-content>
     </n-space>
   </n-layout>
@@ -126,7 +154,7 @@ const loadAllData = () => {
 <style scoped>
 #home-header {
   float: right;
-  margin-top: 20px;
+  /*margin-top: 20px;*/
   margin-right: 20px;
 }
 </style>

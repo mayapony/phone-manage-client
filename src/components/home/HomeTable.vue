@@ -48,7 +48,7 @@ const columns: DataTableColumn[] = !isPhone
 let tableData = ref<CheckTableInterface[]>([]);
 let inputSn = ref('');
 const message = useMessage();
-const options: DropdownOption[] = [
+const optionsRef: DropdownOption[] = [
   {
     label: () => h('span', { style: { color: 'red' } }, '删除'),
     key: 'delete',
