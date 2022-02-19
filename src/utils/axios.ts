@@ -3,8 +3,8 @@ import { IResponse } from '../interface/IResponse';
 
 axios.defaults.timeout = 6000;
 
-axios.defaults.baseURL = 'http://localhost:8080/api';
-// axios.defaults.baseURL = 'http://121.5.239.20:8080/api';
+// axios.defaults.baseURL = 'http://localhost:8080/api';
+axios.defaults.baseURL = 'http://121.5.239.20:8080/api';
 
 // 封装 GET POST 请求并导出
 export function request(url = '', params = {}, type = 'POST'): Promise<IResponse> {

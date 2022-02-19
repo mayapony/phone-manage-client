@@ -1,8 +1,8 @@
 <template>
   <div class="input-password-container">
     <n-input
-      size="large"
       round
+      size="large"
       placeholder="请输入密码"
       id="input-password"
       type="password"
@@ -53,6 +53,7 @@ const handleLogin = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #f3f4f5;
 }
 
 #input-password {

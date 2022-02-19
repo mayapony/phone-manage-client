@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { QrCode as QrCodeIcon } from '@vicons/ionicons5';
 import { DataTableColumn, DropdownOption, NButton, NSpace, useMessage } from 'naive-ui';
-import ImportModal from './ImportModal.vue';
 import { h, nextTick, onMounted, ref } from 'vue';
 import { ItemService } from '../../api/ItemService';
 import { CheckTableInterface } from '../../interface/check-table.interface';
@@ -163,7 +162,7 @@ onMounted(() => {
       trigger="manual"
       :x="xRef"
       :y="yRef"
-      :options="options"
+      :options="optionsRef"
       :show="showDropdownRef"
       :on-clickoutside="onClickOutside"
       @select="handleSelect"

@@ -33,6 +33,5 @@ html,
 body,
 #app {
   height: 100%;
-  background-color: rgba(38, 24, 49, 0.6);
 }
 </style>

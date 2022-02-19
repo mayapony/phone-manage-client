@@ -159,6 +159,11 @@ const handleLoad = (option: CascaderOption) => {
     }
   });
 };
+
+const handleStockInCB = () => {
+  filterConditionRef.value = [];
+  loadAllData({ brandName: '', model: '', color: '' });
+};
 </script>
 
 <script lang="ts">
@@ -184,7 +189,7 @@ export default {
             clearable
             :on-load="handleLoad"
           />
-          <import-modal @refreshData="loadAllData" style="display: inline-block" />
+          <import-modal @refreshData="handleStockInCB" />
         </div>
       </n-layout-header>
       <n-layout-content>
